@@ -1,4 +1,4 @@
-all: cflinuxfs2.tar.gz
+all: opensusefs2.tar.gz
 
 arch:=$(shell uname -m)
 ifeq ("$(arch)","ppc64le")
@@ -11,15 +11,15 @@ else
         docker_file := cflinuxfs2/Dockerfile
 endif
 
-cflinuxfs2.cid: 
-	docker build --no-cache -f $(docker_file) -t cloudfoundry/cflinuxfs2 cflinuxfs2
-	docker run --cidfile=cflinuxfs2.cid cloudfoundry/cflinuxfs2 dpkg -l | tee cflinuxfs2/cflinuxfs2_dpkg_l.out
+opensusefs2.cid:
+	docker build --no-cache -f $(docker_file) -t jandubois/opensusefs2 cflinuxfs2
+	docker run --cidfile=opensusefs2.cid jandubois/opensusefs2 zypper se --installed-only --details | tee cflinuxfs2/opensusefs2_zypper.out
 
-cflinuxfs2.tar: cflinuxfs2.cid
+opensusefs2.tar: opensusefs2.cid
 	mkdir -p tmp
-	docker export `cat cflinuxfs2.cid` > tmp/cflinuxfs2.tar
+	docker export `cat opensusefs2.cid` > tmp/opensusefs2.tar
 	# Always remove the cid file in order to grab updated package versions.
-	rm cflinuxfs2.cid
+	rm opensusefs2.cid
 
-cflinuxfs2.tar.gz: cflinuxfs2.tar
-	docker run -w /stacks -v `pwd`:/stacks $(docker_image) ./bin/make_tarball.sh cflinuxfs2
+opensusefs2.tar.gz: opensusefs2.tar
+	docker run -w /stacks -v `pwd`:/stacks $(docker_image) ./bin/make_tarball.sh opensusefs2
